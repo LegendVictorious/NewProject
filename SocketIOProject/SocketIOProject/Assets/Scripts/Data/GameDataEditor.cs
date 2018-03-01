@@ -11,14 +11,12 @@ public class GameDataEditor : EditorWindow {
     string gameDataFilePath = "/StreamingAssets/data.json";
     public GameData editorData;
     private static GameObject server;
-    private static SocketIOComponent socket;
+    private SocketIOComponent socket;
 
     [MenuItem("Window/Game Data Editor")]
     static void Init()
     {
         EditorWindow.GetWindow(typeof(GameDataEditor)).Show();
-        server = GameObject.Find("Server");
-        socket = server.GetComponent<SocketIOComponent>();
     }
 
     void OnGUI()
@@ -72,7 +70,16 @@ public class GameDataEditor : EditorWindow {
     {
         string jsonObj = JsonUtility.ToJson(editorData);
 
-        socket.Emit("send data", new JSONObject(jsonObj));
+        server = GameObject.Find("Server");
+        if (server)
+        {
+            socket = server.GetComponent<SocketIOComponent>();
+            socket.Emit("send data", new JSONObject(jsonObj));
+        }
+        else
+        {
+            Debug.Log("There is no server object in the active scene!");
+        }
     }
 
     DateTime ConvertToDateTime(string dateTimeString)
